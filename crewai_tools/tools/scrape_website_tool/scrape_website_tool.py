@@ -1,9 +1,9 @@
 import os
-import requests
 from bs4 import BeautifulSoup
 from typing import Optional, Type, Any
 from pydantic.v1 import BaseModel, Field
 from ..base_tool import BaseTool
+from security import safe_requests
 
 class FixedScrapeWebsiteToolSchema(BaseModel):
 	"""Input for ScrapeWebsiteTool."""
@@ -44,7 +44,7 @@ class ScrapeWebsiteTool(BaseTool):
 		**kwargs: Any,
 	) -> Any:
 		website_url = kwargs.get('website_url', self.website_url)
-		page = requests.get(website_url, headers=self.headers, cookies=self.cookies if self.cookies else {})
+		page = safe_requests.get(website_url, headers=self.headers, cookies=self.cookies if self.cookies else {})
 		parsed = BeautifulSoup(page.content, "html.parser")
 		text = parsed.get_text()
 		text = '\n'.join([i for i in text.split('\n') if i.strip() != ''])
