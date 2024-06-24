@@ -27,7 +27,7 @@ class SeperDevTool(BaseTool):
 				'X-API-KEY': os.environ['SERPER_API_KEY'],
 				'content-type': 'application/json'
 		}
-		response = requests.request("POST", self.search_url, headers=headers, data=payload)
+		response = requests.request("POST", self.search_url, headers=headers, data=payload, timeout=60)
 		results = response.json()['organic']
 		stirng = []
 		for result in results:
