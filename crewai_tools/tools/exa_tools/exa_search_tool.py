@@ -21,7 +21,7 @@ class EXASearchTool(EXABaseTool):
     headers = self.headers.copy()
     headers["x-api-key"] = os.environ['EXA_API_KEY']
 
-    response = requests.post(self.search_url, json=payload, headers=headers)
+    response = requests.post(self.search_url, json=payload, headers=headers, timeout=60)
     results = response.json()
     if 'results' in results:
       results = super()._parse_results(results['results'])

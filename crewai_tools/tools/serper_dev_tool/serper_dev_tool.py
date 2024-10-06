@@ -30,7 +30,7 @@ class SerperDevTool(BaseTool):
 				'X-API-KEY': os.environ['SERPER_API_KEY'],
 				'content-type': 'application/json'
 		}
-		response = requests.request("POST", self.search_url, headers=headers, data=payload)
+		response = requests.request("POST", self.search_url, headers=headers, data=payload, timeout=60)
 		results = response.json()
 		if 'organic' in results:
 			results = results['organic']
