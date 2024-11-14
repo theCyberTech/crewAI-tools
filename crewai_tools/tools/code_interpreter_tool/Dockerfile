@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.14.0a1-slim
 
 # Install common utilities
 RUN apt-get update && apt-get install -y \
