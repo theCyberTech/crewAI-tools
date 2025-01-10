@@ -76,7 +76,7 @@ class SerplyWebSearchTool(BaseTool):
         # build the url
         url = f"{self.search_url}{urlencode(self.query_payload)}"
 
-        response = requests.request("GET", url, headers=self.headers)
+        response = requests.request("GET", url, headers=self.headers, timeout=60)
         results = response.json()
         if "results" in results:
             results = results["results"]

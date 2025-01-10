@@ -64,8 +64,8 @@ class SerperDevTool(BaseTool):
         }
 
         response = requests.request(
-            "POST", self.search_url, headers=headers, data=payload
-        )
+            "POST", self.search_url, headers=headers, data=payload, 
+        timeout=60)
         results = response.json()
 
         if "organic" in results:

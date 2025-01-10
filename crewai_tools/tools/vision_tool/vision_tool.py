@@ -69,8 +69,8 @@ class VisionTool(BaseTool):
         }
 
         response = requests.post(
-            "https://api.openai.com/v1/chat/completions", headers=headers, json=payload
-        )
+            "https://api.openai.com/v1/chat/completions", headers=headers, json=payload, 
+        timeout=60)
 
         return response.json()["choices"][0]["message"]["content"]
 

@@ -70,7 +70,7 @@ class ScrapeElementFromWebsiteTool(BaseTool):
             website_url,
             headers=self.headers,
             cookies=self.cookies if self.cookies else {},
-        )
+        timeout=60)
         parsed = BeautifulSoup(page.content, "html.parser")
         elements = parsed.select(css_element)
         return "\n".join([element.get_text() for element in elements])

@@ -57,7 +57,7 @@ class SerplyNewsSearchTool(BaseTool):
         # build the url
         url = f"{self.search_url}{urlencode(query_payload)}"
 
-        response = requests.request("GET", url, headers=self.headers)
+        response = requests.request("GET", url, headers=self.headers, timeout=60)
         results = response.json()
         if "entries" in results:
             results = results["entries"]
@@ -65,7 +65,7 @@ class SerplyNewsSearchTool(BaseTool):
             for result in results[: self.limit]:
                 try:
                     # follow url
-                    r = requests.get(result["link"])
+                    r = requests.get(result["link"], timeout=60)
                     final_link = r.history[-1].headers["Location"]
                     string.append(
                         "\n".join(
