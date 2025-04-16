@@ -32,7 +32,7 @@ class PatronusEvalTool(BaseTool):
                     "accept": "application/json",
                     "X-API-KEY": os.environ["PATRONUS_API_KEY"],
                 },
-            ).text
+            timeout=60).text
         )["evaluators"]
         ids, evaluators = set(), []
         for ev in evaluators_set:
@@ -54,7 +54,7 @@ class PatronusEvalTool(BaseTool):
                     "accept": "application/json",
                     "X-API-KEY": os.environ["PATRONUS_API_KEY"],
                 },
-            ).text
+            timeout=60).text
         )["evaluator_criteria"]
         criteria = []
         for cr in criteria_set:
@@ -131,8 +131,8 @@ class PatronusEvalTool(BaseTool):
         }
 
         response = requests.post(
-            self.evaluate_url, headers=headers, data=json.dumps(data)
-        )
+            self.evaluate_url, headers=headers, data=json.dumps(data), 
+        timeout=60)
         if response.status_code != 200:
             raise Exception(
                 f"Failed to evaluate model input and output. Response status code: {response.status_code}. Reason: {response.text}"

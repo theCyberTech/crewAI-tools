@@ -57,7 +57,7 @@ class SerplyScholarSearchTool(BaseTool):
         # build the url
         url = f"{self.search_url}{urlencode(query_payload)}"
 
-        response = requests.request("GET", url, headers=self.headers)
+        response = requests.request("GET", url, headers=self.headers, timeout=60)
         articles = response.json().get("articles", "")
 
         if not articles:

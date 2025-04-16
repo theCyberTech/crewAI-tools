@@ -84,7 +84,7 @@ class BraveSearchTool(BaseTool):
                 "Accept": "application/json",
             }
 
-            response = requests.get(self.search_url, headers=headers, params=payload)
+            response = requests.get(self.search_url, headers=headers, params=payload, timeout=60)
             response.raise_for_status()  # Handle non-200 responses
             results = response.json()
 
