@@ -8,6 +8,7 @@ import json
 
 from pydantic import BaseModel, Field
 from crewai.tools.base_tool import BaseTool
+from security import safe_command
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -176,8 +177,7 @@ class StagehandExtractTool(BaseTool):
 
         try:
             # Execute Node.js script
-            result = subprocess.run(
-                command,
+            result = safe_command.run(subprocess.run, command,
                 check=True,
                 capture_output=True,
                 text=True
