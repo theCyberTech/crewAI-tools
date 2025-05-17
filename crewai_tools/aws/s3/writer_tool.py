@@ -29,7 +29,7 @@ class S3WriterTool(BaseTool):
                 's3',
                 region_name=os.getenv('CREW_AWS_REGION', 'us-east-1'),
                 aws_access_key_id=os.getenv('CREW_AWS_ACCESS_KEY_ID'),
-                aws_secret_access_key=os.getenv('CREW_AWS_SEC_ACCESS_KEY')
+                aws_secret_access_key=os.getenv('CREW_AWS_SECRET_ACCESS_KEY')
             )
 
             s3.put_object(Bucket=bucket_name, Key=object_key, Body=content.encode('utf-8'))

@@ -21,7 +21,7 @@ Set the following environment variables:
 
 - `CREW_AWS_REGION`
 - `CREW_AWS_ACCESS_KEY_ID`
-- `CREW_AWS_SEC_ACCESS_KEY`
+- `CREW_AWS_SECRET_ACCESS_KEY`
 
 ## Usage
 
