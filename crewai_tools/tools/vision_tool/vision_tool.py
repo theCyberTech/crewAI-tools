@@ -1,11 +1,10 @@
 import base64
-from typing import Type
+from pathlib import Path
+from typing import Optional, Type
 
-import requests
-from openai import OpenAI
-from pydantic import BaseModel
-
-from crewai_tools.tools.base_tool import BaseTool
+from crewai import LLM
+from crewai.tools import BaseTool
+from pydantic import BaseModel, PrivateAttr, field_validator
 
 
 class ImagePromptSchema(BaseModel):
@@ -13,82 +12,116 @@ class ImagePromptSchema(BaseModel):
 
     image_path_url: str = "The image path or URL."
 
+    @field_validator("image_path_url")
+    def validate_image_path_url(cls, v: str) -> str:
+        if v.startswith("http"):
+            return v
+
+        path = Path(v)
+        if not path.exists():
+            raise ValueError(f"Image file does not exist: {v}")
+
+        # Validate supported formats
+        valid_extensions = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+        if path.suffix.lower() not in valid_extensions:
+            raise ValueError(
+                f"Unsupported image format. Supported formats: {valid_extensions}"
+            )
+
+        return v
+
 
 class VisionTool(BaseTool):
+    """Tool for analyzing images using vision models.
+
+    Args:
+        llm: Optional LLM instance to use
+        model: Model identifier to use if no LLM is provided
+    """
+
     name: str = "Vision Tool"
     description: str = (
         "This tool uses OpenAI's Vision API to describe the contents of an image."
     )
     args_schema: Type[BaseModel] = ImagePromptSchema
 
-    def _run_web_hosted_images(self, client, image_path_url: str) -> str:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": "What's in this image?"},
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": image_path_url},
-                        },
-                    ],
-                }
-            ],
-            max_tokens=300,
-        )
+    _model: str = PrivateAttr(default="gpt-4o-mini")
+    _llm: Optional[LLM] = PrivateAttr(default=None)
 
-        return response.choices[0].message.content
+    def __init__(self, llm: Optional[LLM] = None, model: str = "gpt-4o-mini", **kwargs):
+        """Initialize the vision tool.
 
-    def _run_local_images(self, client, image_path_url: str) -> str:
-        base64_image = self._encode_image(image_path_url)
+        Args:
+            llm: Optional LLM instance to use
+            model: Model identifier to use if no LLM is provided
+            **kwargs: Additional arguments for the base tool
+        """
+        super().__init__(**kwargs)
+        self._model = model
+        self._llm = llm
 
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {client.api_key}",
-        }
+    @property
+    def model(self) -> str:
+        """Get the current model identifier."""
+        return self._model
 
-        payload = {
-            "model": "gpt-4o-mini",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": "What's in this image?"},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            },
-                        },
-                    ],
-                }
-            ],
-            "max_tokens": 300,
-        }
+    @model.setter
+    def model(self, value: str) -> None:
+        """Set the model identifier and reset LLM if it was auto-created."""
+        self._model = value
+        if self._llm is not None and self._llm._model != value:
+            self._llm = None
 
-        response = requests.post(
-            "https://api.openai.com/v1/chat/completions", headers=headers, json=payload
-        )
-
-        return response.json()["choices"][0]["message"]["content"]
+    @property
+    def llm(self) -> LLM:
+        """Get the LLM instance, creating one if needed."""
+        if self._llm is None:
+            self._llm = LLM(model=self._model, stop=["STOP", "END"])
+        return self._llm
 
     def _run(self, **kwargs) -> str:
-        client = OpenAI()
+        try:
+            image_path_url = kwargs.get("image_path_url")
+            if not image_path_url:
+                return "Image Path or URL is required."
 
-        image_path_url = kwargs.get("image_path_url")
+            ImagePromptSchema(image_path_url=image_path_url)
 
-        if not image_path_url:
-            return "Image Path or URL is required."
+            if image_path_url.startswith("http"):
+                image_data = image_path_url
+            else:
+                try:
+                    base64_image = self._encode_image(image_path_url)
+                    image_data = f"data:image/jpeg;base64,{base64_image}"
+                except Exception as e:
+                    return f"Error processing image: {str(e)}"
 
-        if "http" in image_path_url:
-            image_description = self._run_web_hosted_images(client, image_path_url)
-        else:
-            image_description = self._run_local_images(client, image_path_url)
+            response = self.llm.call(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": "What's in this image?"},
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": image_data},
+                            },
+                        ],
+                    },
+                ],
+            )
+            return response
+        except Exception as e:
+            return f"An error occurred: {str(e)}"
 
-        return image_description
+    def _encode_image(self, image_path: str) -> str:
+        """Encode an image file as base64.
 
-    def _encode_image(self, image_path: str):
+        Args:
+            image_path: Path to the image file
+
+        Returns:
+            Base64-encoded image data
+        """
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode("utf-8")

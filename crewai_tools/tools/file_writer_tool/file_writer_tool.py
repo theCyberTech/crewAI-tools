@@ -1,16 +1,29 @@
 import os
 from typing import Any, Optional, Type
+
+from crewai.tools import BaseTool
 from pydantic import BaseModel
-from ..base_tool import BaseTool
-from distutils.util import strtobool
+
+
+def strtobool(val) -> bool:
+    if isinstance(val, bool):
+        return val
+    val = val.lower()
+    if val in ("y", "yes", "t", "true", "on", "1"):
+        return True
+    elif val in ("n", "no", "f", "false", "off", "0"):
+        return False
+    else:
+        raise ValueError(f"invalid value to cast to bool: {val!r}")
 
 
 class FileWriterToolInput(BaseModel):
-    filename: str 
+    filename: str
     directory: Optional[str] = "./"
-    overwrite: str = "False"
+    overwrite: str | bool = False
     content: str
-    
+
+
 class FileWriterTool(BaseTool):
     name: str = "File Writer Tool"
     description: str = (
@@ -26,9 +39,9 @@ class FileWriterTool(BaseTool):
 
             # Construct the full path
             filepath = os.path.join(kwargs.get("directory") or "", kwargs["filename"])
-            
+
             # Convert overwrite to boolean
-            kwargs["overwrite"] = bool(strtobool(kwargs["overwrite"]))
+            kwargs["overwrite"] = strtobool(kwargs["overwrite"])
 
             # Check if file exists and overwrite is not allowed
             if os.path.exists(filepath) and not kwargs["overwrite"]:

@@ -1,9 +1,8 @@
 import logging
 from typing import Any, Dict, Literal, Optional, Type
 
+from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
-
-from crewai_tools.tools.base_tool import BaseTool
 
 logger = logging.getLogger(__file__)
 
@@ -35,9 +34,18 @@ class ScrapflyScrapeWebsiteTool(BaseTool):
         try:
             from scrapfly import ScrapflyClient
         except ImportError:
-            raise ImportError(
-                "`scrapfly` package not found, please run `pip install scrapfly-sdk`"
-            )
+            import click
+
+            if click.confirm(
+                "You are missing the 'scrapfly-sdk' package. Would you like to install it?"
+            ):
+                import subprocess
+
+                subprocess.run(["uv", "add", "scrapfly-sdk"], check=True)
+            else:
+                raise ImportError(
+                    "`scrapfly-sdk` package not found, please run `uv add scrapfly-sdk`"
+                )
         self.scrapfly = ScrapflyClient(key=api_key)
 
     def _run(
