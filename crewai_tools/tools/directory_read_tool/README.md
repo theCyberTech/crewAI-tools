@@ -1,4 +1,3 @@
-```markdown
 # DirectoryReadTool
 
 ## Description
@@ -35,6 +34,5 @@ The DirectoryReadTool requires minimal configuration for use. The essential argu
 - `directory`: A mandatory argument that specifies the path to the directory whose contents you wish to list. It accepts both absolute and relative paths, guiding the tool to the desired directory for content listing.
 
 The DirectoryReadTool provides a user-friendly and efficient way to list directory contents, making it an invaluable tool for managing and inspecting directory structures.
-```
 
 This revised documentation for the DirectoryReadTool maintains the structure and content requirements as outlined, with adjustments made for clarity, consistency, and adherence to the high-quality standards exemplified in the provided documentation example.
