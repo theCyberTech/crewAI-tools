@@ -1,8 +1,8 @@
-import random
 
 from crewai import Agent, Crew, Task
 from patronus import Client, EvaluationResult
 from patronus_local_evaluator_tool import PatronusLocalEvaluatorTool
+import secrets
 
 # Test the PatronusLocalEvaluatorTool where agent uses the local evaluator
 client = Client()
@@ -11,7 +11,7 @@ client = Client()
 # Example of an evaluator that returns a random pass/fail result
 @client.register_local_evaluator("random_evaluator")
 def random_evaluator(**kwargs):
-    score = random.random()
+    score = secrets.SystemRandom().random()
     return EvaluationResult(
         score_raw=score,
         pass_=score >= 0.5,
