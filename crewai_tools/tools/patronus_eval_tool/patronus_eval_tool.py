@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 from crewai.tools import BaseTool
+from security import safe_requests
 
 
 class PatronusEvalTool(BaseTool):
@@ -26,7 +27,7 @@ class PatronusEvalTool(BaseTool):
 
     def _init_run(self):
         evaluators_set = json.loads(
-            requests.get(
+            safe_requests.get(
                 "https://api.patronus.ai/v1/evaluators",
                 headers={
                     "accept": "application/json",
@@ -48,7 +49,7 @@ class PatronusEvalTool(BaseTool):
                 ids.add(ev["id"])
 
         criteria_set = json.loads(
-            requests.get(
+            safe_requests.get(
                 "https://api.patronus.ai/v1/evaluator-criteria",
                 headers={
                     "accept": "application/json",

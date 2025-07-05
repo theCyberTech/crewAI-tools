@@ -1,10 +1,9 @@
 import os
 from typing import Any, Optional, Type
-
-import requests
 from bs4 import BeautifulSoup
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
+from security import safe_requests
 
 
 class FixedScrapeElementFromWebsiteToolSchema(BaseModel):
@@ -63,7 +62,7 @@ class ScrapeElementFromWebsiteTool(BaseTool):
     ) -> Any:
         website_url = kwargs.get("website_url", self.website_url)
         css_element = kwargs.get("css_element", self.css_element)
-        page = requests.get(
+        page = safe_requests.get(
             website_url,
             headers=self.headers,
             cookies=self.cookies if self.cookies else {},

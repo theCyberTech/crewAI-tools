@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 import requests
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
+from security import safe_requests
 
 
 class SerplyNewsSearchToolSchema(BaseModel):
@@ -64,7 +65,7 @@ class SerplyNewsSearchTool(BaseTool):
             for result in results[: self.limit]:
                 try:
                     # follow url
-                    r = requests.get(result["link"])
+                    r = safe_requests.get(result["link"])
                     final_link = r.history[-1].headers["Location"]
                     string.append(
                         "\n".join(

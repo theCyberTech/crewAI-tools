@@ -3,6 +3,7 @@ from pydantic import Field, create_model
 from typing import List, Any, Dict, Optional
 import json
 from crewai.tools import BaseTool
+from security import safe_requests
 
 # DEFAULTS
 ENTERPRISE_ACTION_KIT_PROJECT_ID = "dd525517-df22-49d2-a69e-6a0eed211166"
@@ -152,7 +153,7 @@ class EnterpriseActionKitToolAdapter:
             headers = {"Authorization": f"Bearer {self.enterprise_action_token}"}
             params = {"format": "json_schema"}
 
-            response = requests.get(
+            response = safe_requests.get(
                 actions_url, headers=headers, params=params, timeout=30
             )
             response.raise_for_status()

@@ -1,8 +1,7 @@
 from typing import Optional, Type
-
-import requests
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
+from security import safe_requests
 
 
 class JinaScrapeWebsiteToolInput(BaseModel):
@@ -45,7 +44,7 @@ class JinaScrapeWebsiteTool(BaseTool):
                 "Website URL must be provided either during initialization or execution"
             )
 
-        response = requests.get(
+        response = safe_requests.get(
             f"https://r.jina.ai/{url}", headers=self.headers, timeout=15
         )
         response.raise_for_status()

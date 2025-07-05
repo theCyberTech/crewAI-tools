@@ -6,6 +6,7 @@ from typing import Any, ClassVar, Optional, Type
 import requests
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
+from security import safe_requests
 
 
 def _save_results_to_file(content: str) -> None:
@@ -84,7 +85,7 @@ class BraveSearchTool(BaseTool):
                 "Accept": "application/json",
             }
 
-            response = requests.get(self.search_url, headers=headers, params=payload)
+            response = safe_requests.get(self.search_url, headers=headers, params=payload)
             response.raise_for_status()  # Handle non-200 responses
             results = response.json()
 
