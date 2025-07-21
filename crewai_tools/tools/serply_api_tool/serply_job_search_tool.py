@@ -54,7 +54,7 @@ class SerplyJobSearchTool(RagTool):
         # build the url
         url = f"{self.request_url}{urlencode(query_payload)}"
 
-        response = requests.request("GET", url, headers=self.headers)
+        response = requests.request("GET", url, headers=self.headers, timeout=60)
 
         jobs = response.json().get("jobs", "")
 
